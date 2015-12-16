@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "domelementtype": "^1.3.0",
     "htmlparser2": "^3.9.0",
     "meow": "^3.6.0",
     "request": "^2.67.0",
