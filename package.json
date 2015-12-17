@@ -12,6 +12,10 @@
     "request": "^2.67.0",
     "rx": "^4.0.7"
   },
+  "files": [
+    "lib",
+    "reporters"
+  ],
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
