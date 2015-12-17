@@ -2,6 +2,9 @@
 
 Validate your HTML usage of the CSS BEM methodology
 
+![img](http://i.imgur.com/QgIfk7i.png)
+
+
 ## Install 
 
 ```shell
