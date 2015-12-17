@@ -2,31 +2,41 @@ const logger  = require("eazy-logger").Logger({
     prefix: "{magenta:[BV] }",
     useLevelPrefixes: false
 });
-
-var totalCount = 0;
-var taskCount  = 0;
+const objassign = require('object-assign');
+var totalCount  = 0;
+var taskCount   = 0;
+const defaults  = {
+    logZeroErrors: true
+};
 
 function reportErrors (incoming, cli) {
-    cli = cli || {};
-    console.log('');
-    logger.info('{cyan:%s}', incoming.from);
+    cli       = cli || {};
+    cli.flags = objassign({}, defaults, cli.flags);
+
+    const logQueue = [{level: 'info', msg: ['{cyan:%s}', incoming.from]}];
+
     taskCount = 0;
 
     cli.nls = getNewlineIndexes(incoming.subject);
 
-    report(incoming.errors);
+    report(incoming.errors, logQueue);
 
-    logger.info('{grey:Total Errors {bold.grey:[%s]}} {grey:[%s]}', taskCount, incoming.from);
+    logQueue.push({level: 'info', msg: ['{grey:Total Errors {bold.grey:[%s]}} {grey:[%s]}', taskCount, incoming.from]});
+
+    if (taskCount !== 0) {
+        logQueue.forEach(function (item) {
+            logger[item.level].apply(logger, item.msg);
+        });
+    }
 
     /**
      * Report recursively
      * @param items
      * @param nls
-     * @returns {*}
      */
     function report(items) {
         return items.forEach((x) => {
-            reportOne(x, cli);
+            reportOne(x, cli, logQueue);
             if (x.children.length) {
                 report(x.children);
             }
@@ -66,21 +76,20 @@ function convertToLine (loc, nls) {
  * @param node
  * @param nls
  */
-function reportOne(node, opts) {
+function reportOne(node, opts, logQueue) {
     if (node.errors.length) {
         var line = convertToLine(node.loc, opts.nls);
         node.errors.forEach(function (err) {
-            taskCount += 1;
-            logger.info(`{red:[line: %s]} %s`, line, err.message);
+            taskCount  += 1;
+            totalCount += 1;
+            logQueue.push({level: 'info', msg: [`{red:[line: %s]} %s`, line, err.message]});
         });
 
         if (opts.flags.codeBlocks) {
-            console.log('');
-            console.log(leftPad(getCodeBlock(node.subject, node.loc), 3) + '...');
-            console.log('');
+            //console.log('');
+            //console.log(leftPad(getCodeBlock(node.subject, node.loc), 3) + '...');
+            //console.log('');
         }
-
-        //console.log('');
     }
 }
 

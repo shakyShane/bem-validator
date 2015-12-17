@@ -9,6 +9,7 @@
     "eazy-logger": "2.1.2",
     "htmlparser2": "^3.9.0",
     "meow": "^3.6.0",
+    "object-assign": "4.0.1",
     "request": "^2.67.0",
     "rx": "^4.0.7"
   },

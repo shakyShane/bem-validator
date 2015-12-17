@@ -55,7 +55,8 @@ function handleCli(cli, cb) {
             } else {
                 reporter(x, cli);
             }
-        }, err => console.log('e', err.stack), cb)
+            cb(null, x);
+        }, err => cb(err))
 }
 
 function processString(string, cb) {
