@@ -5,7 +5,7 @@ const Rx         = require("rx");
 const reporter   = require("./reporters/default");
 const fs         = require('fs');
 const utils      = require('./lib/utils');
-const dom        = require('./lib/domhandler');
+const Dom        = require('./lib/domhandler');
 const tests      = [
     './lib/elementWithoutBlockTest',
     './lib/modifierWithoutBlockOrElementTest'
@@ -60,7 +60,7 @@ function handleCli(cli, cb) {
 
 function processString(string, cb) {
 
-    var handler = new dom(function (err, dom) {
+    var handler = new Dom(function (err, dom) {
         if (err) {
             return cb(err);
         }

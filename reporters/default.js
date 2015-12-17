@@ -1,5 +1,5 @@
 const logger  = require("eazy-logger").Logger({
-    prefix: "{magenta:[BV]: }",
+    prefix: "{magenta:[BV] }",
     useLevelPrefixes: false
 });
 
@@ -71,7 +71,7 @@ function reportOne(node, opts) {
         var line = convertToLine(node.loc, opts.nls);
         node.errors.forEach(function (err) {
             taskCount += 1;
-            logger.info(`{red:[%s]} %s`, line, err.message);
+            logger.info(`{red:[line: %s]} %s`, line, err.message);
         });
 
         if (opts.flags.codeBlocks) {
