@@ -1,8 +1,11 @@
+#!/usr/bin/env node
+
 const htmlparser = require("htmlparser2");
 const Rx         = require("rx");
 const reporter   = require("./reporters/default");
 const fs         = require('fs');
 const utils      = require('./lib/utils');
+const dom        = require('./lib/domhandler');
 const tests      = [
     './lib/elementWithoutBlockTest',
     './lib/modifierWithoutBlockOrElementTest'
@@ -44,29 +47,32 @@ function handleCli(cli, cb) {
         .from(queue)
         .concatAll()
         .flatMap(x => {
-            return oneObs(x.content).map(errors => ({from: x.from, errors}));
+            return oneObs(x.content).map(errors => ({from: x.from, errors, subject: x.content}));
         })
         .subscribe(x => {
             if (cli.flags.reporter) {
-                require(cli.flags.reporter)(x)
+                require(cli.flags.reporter)(x, cli)
             } else {
-                reporter(x);
+                reporter(x, cli);
             }
         }, err => console.log('e', err.stack), cb)
 }
 
 function processString(string, cb) {
-    var handler = new htmlparser.DomHandler(function (err, dom) {
+
+    var handler = new dom(function (err, dom) {
         if (err) {
             return cb(err);
         }
         cb(err, utils.verifyDom(dom, string, tests.map(x => require(x)), []));
     }, {}, {
-        open: function (elem) {
-        	elem.startIndex = parser.startIndex;
+        onopentag: function (elem) {
+            elem.parserLoc = {start: parser.startIndex}
         },
-        close: function (elem) {
-            elem.endIndex = parser.endIndex;
+        onclosetag: function (elem) {
+            if (elem.parserLoc) {
+                elem.parserLoc.end = parser.endIndex
+            }
         }
     });
     var parser = new htmlparser.Parser(handler);
