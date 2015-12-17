@@ -51,11 +51,14 @@ function handleCli(cli, cb) {
         })
         .subscribe(x => {
             if (cli.flags.reporter) {
-                require(cli.flags.reporter)(x, cli)
+                require(cli.flags.reporter)(x, cli, function () {
+                    cb(null, x);
+                })
             } else {
-                reporter(x, cli);
+                reporter(x, cli, function () {
+                    cb(null, x);
+                });
             }
-            cb(null, x);
         }, err => cb(err))
 }
 

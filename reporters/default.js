@@ -9,7 +9,7 @@ const defaults  = {
     logZeroErrors: true
 };
 
-function reportErrors (incoming, cli) {
+function reportErrors (incoming, cli, cb) {
     cli       = cli || {};
     cli.flags = objassign({}, defaults, cli.flags);
 
@@ -28,6 +28,8 @@ function reportErrors (incoming, cli) {
             logger[item.level].apply(logger, item.msg);
         });
     }
+
+    cb(null);
 
     /**
      * Report recursively
