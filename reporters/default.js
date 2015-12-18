@@ -2,14 +2,18 @@ const logger  = require("eazy-logger").Logger({
     prefix: "{magenta:[BV] }",
     useLevelPrefixes: false
 });
+
 const objassign = require('object-assign');
+
 var totalCount  = 0;
 var taskCount   = 0;
+
 const defaults  = {
     logZeroErrors: true
 };
 
 function reportErrors (incoming, cli, cb) {
+
     cli       = cli || {};
     cli.flags = objassign({}, defaults, cli.flags);
 

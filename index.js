@@ -3,6 +3,7 @@
 const htmlparser = require("htmlparser2");
 const Rx         = require("rx");
 const reporter   = require("./reporters/default");
+const objectAssign = require("object-assign");
 const fs         = require('fs');
 const utils      = require('./lib/utils');
 const Dom        = require('./lib/domhandler');
@@ -34,32 +35,28 @@ function oneObs (content) {
 }
 
 function handleCli(cli, cb) {
+
+    cb = cb || function () {};
     cli.flags = cli.flags || {};
 
     if (!cli.input.length) {
         return cli.showHelp();
     }
+}
 
-    var queue = utils.convertToQueue(cli.input)
+function getRunner (input, userOpts) {
+    const defaults = {};
+    const opts  = objectAssign({}, defaults, userOpts);
+    const queue = utils
+        .convertToQueue(input)
         .filter(x => x);
 
-    Rx.Observable
+    return Rx.Observable
         .from(queue)
         .concatAll()
         .flatMap(x => {
             return oneObs(x.content).map(errors => ({from: x.from, errors, subject: x.content}));
-        })
-        .subscribe(x => {
-            if (cli.flags.reporter) {
-                require(cli.flags.reporter)(x, cli, function () {
-                    cb(null, x);
-                })
-            } else {
-                reporter(x, cli, function () {
-                    cb(null, x);
-                });
-            }
-        }, err => cb(err))
+        });
 }
 
 function processString(string, cb) {
@@ -69,19 +66,11 @@ function processString(string, cb) {
             return cb(err);
         }
         cb(err, utils.verifyDom(dom, string, tests.map(x => require(x)), []));
-    }, {}, {
-        onopentag: function (elem) {
-            elem.parserLoc = {start: parser.startIndex}
-        },
-        onclosetag: function (elem) {
-            if (elem.parserLoc) {
-                elem.parserLoc.end = parser.endIndex
-            }
-        }
-    });
+    }, {}, {});
     var parser = new htmlparser.Parser(handler);
     parser.write(string);
     parser.done();
 }
 
 module.exports = handleCli;
+module.exports.getRunner = getRunner;
