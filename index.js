@@ -42,6 +42,21 @@ function handleCli(cli, cb) {
     if (!cli.input.length) {
         return cli.showHelp();
     }
+
+    function report (incoming) {
+        if (cli.flags.reporter) {
+            require(cli.flags.reporter)(incoming, cli, function () {
+                cb(null, incoming);
+            })
+        } else {
+            reporter(incoming, cli, function () {
+                cb(null, incoming);
+            });
+        }
+    }
+
+    getRunner(cli.input)
+        .subscribe(report);
 }
 
 function getRunner (input, userOpts) {
@@ -53,7 +68,7 @@ function getRunner (input, userOpts) {
 
     return Rx.Observable
         .from(queue)
-        .concatAll()
+        .mergeAll()
         .flatMap(x => {
             return oneObs(x.content).map(errors => ({from: x.from, errors, subject: x.content}));
         });
